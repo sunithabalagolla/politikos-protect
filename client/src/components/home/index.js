@@ -1,0 +1,5 @@
+export { default as HeroSection } from './HeroSection'
+export { default as EcosystemSection } from './EcosystemSection'
+export { default as RationaleSection } from './RationaleSection'
+export { default as FeaturesSection } from './FeaturesSection'
+export { default as PhilosophySection } from './PhilosophySection'
