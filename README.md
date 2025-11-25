@@ -1,4 +1,4 @@
-# Politikos People Center
+# Politikos Protect
 
 A comprehensive civic engagement platform that empowers citizens to report issues, participate in community events, and share their voice through surveys.
 
@@ -162,7 +162,7 @@ node make-admin.js user@example.com
 ## Project Structure
 
 ```
-politikos-people-center/
+politikos-protect/
 ├── client/                 # React frontend
 │   ├── src/
 │   │   ├── components/    # Reusable UI components
