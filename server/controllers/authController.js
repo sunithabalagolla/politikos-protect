@@ -7,15 +7,77 @@ const { generateToken } = require('../utils/tokenUtils');
  */
 const register = async (req, res, next) => {
   try {
-    const { name, email, password } = req.body;
+    const { 
+      name, 
+      firstName, 
+      lastName, 
+      email, 
+      password, 
+      phoneNumber, 
+      state, 
+      city, 
+      gender 
+    } = req.body;
 
     // Validate required fields
-    if (!name || !email || !password) {
+    if (!email || !password) {
       return res.status(400).json({
         success: false,
         error: {
-          message: 'Please provide name, email, and password',
+          message: 'Please provide email and password',
           code: 'MISSING_FIELDS'
+        }
+      });
+    }
+
+    // Validate email format - MUST come before duplicate check
+    const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({
+        success: false,
+        error: {
+          message: 'Please provide a valid email address',
+          code: 'INVALID_EMAIL_FORMAT'
+        }
+      });
+    }
+
+    // Check for common email typos
+    const commonTypos = [
+      'gmai.com', 'gmial.com', 'gamil.com', 'gmil.com', 'gma.com', // gmail typos
+      'yahooo.com', 'yaho.com', 'yhoo.com', // yahoo typos
+      'outlok.com', 'outloo.com', 'hotmial.com', // outlook/hotmail typos
+      'iclou.com', 'icloud.co' // icloud typos
+    ];
+    const domain = email.split('@')[1]?.toLowerCase();
+    if (commonTypos.includes(domain)) {
+      return res.status(400).json({
+        success: false,
+        error: {
+          message: 'Please provide a valid email address',
+          code: 'INVALID_EMAIL_FORMAT'
+        }
+      });
+    }
+
+    // Validate name (either full name or first+last name)
+    if (!name && (!firstName || !lastName)) {
+      return res.status(400).json({
+        success: false,
+        error: {
+          message: 'Please provide your name',
+          code: 'MISSING_NAME'
+        }
+      });
+    }
+
+    // Check password length
+    if (password.length < 8) {
+      return res.status(400).json({
+        success: false,
+        error: {
+          message: 'Password must be at least 8 characters',
+          code: 'INVALID_PASSWORD'
         }
       });
     }
@@ -32,12 +94,28 @@ const register = async (req, res, next) => {
       });
     }
 
-    // Create new citizen
-    const citizen = await Citizen.create({
-      name,
+    // Prepare citizen data
+    const citizenData = {
+      name: name || `${firstName} ${lastName}`,
       email,
       password
-    });
+    };
+
+    // Add optional fields if provided
+    if (firstName) citizenData.firstName = firstName;
+    if (lastName) citizenData.lastName = lastName;
+    if (phoneNumber) citizenData.phoneNumber = phoneNumber;
+    if (gender) citizenData.gender = gender;
+    
+    // Add location data
+    if (state || city) {
+      citizenData.location = {};
+      if (state) citizenData.location.state = state;
+      if (city) citizenData.location.city = city;
+    }
+
+    // Create new citizen
+    const citizen = await Citizen.create(citizenData);
 
     // Generate token
     const token = generateToken(citizen);

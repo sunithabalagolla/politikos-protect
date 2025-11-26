@@ -9,6 +9,16 @@ const citizenSchema = new mongoose.Schema({
     minlength: [2, 'Name must be at least 2 characters'],
     maxlength: [100, 'Name cannot exceed 100 characters']
   },
+  firstName: {
+    type: String,
+    trim: true,
+    maxlength: [50, 'First name cannot exceed 50 characters']
+  },
+  lastName: {
+    type: String,
+    trim: true,
+    maxlength: [50, 'Last name cannot exceed 50 characters']
+  },
   email: {
     type: String,
     required: [true, 'Email is required'],
@@ -23,6 +33,16 @@ const citizenSchema = new mongoose.Schema({
     minlength: [6, 'Password must be at least 6 characters'],
     select: false  // Don't include in queries by default
   },
+  phoneNumber: {
+    type: String,
+    trim: true,
+    match: [/^[\d\s\-\+\(\)]+$/, 'Please provide a valid phone number']
+  },
+  gender: {
+    type: String,
+    enum: ['male', 'female', 'other', 'prefer-not-to-say', ''],
+    default: ''
+  },
   role: {
     type: String,
     enum: ['citizen', 'admin'],
@@ -30,8 +50,14 @@ const citizenSchema = new mongoose.Schema({
   },
   location: {
     address: String,
-    city: String,
-    state: String,
+    city: {
+      type: String,
+      trim: true
+    },
+    state: {
+      type: String,
+      trim: true
+    },
     zipCode: String,
     coordinates: {
       type: {
@@ -104,7 +130,11 @@ citizenSchema.methods.toPublicJSON = function() {
   return {
     id: this._id,
     name: this.name,
+    firstName: this.firstName,
+    lastName: this.lastName,
     email: this.email,
+    phoneNumber: this.phoneNumber,
+    gender: this.gender,
     role: this.role,
     location: this.location,
     interests: this.interests,

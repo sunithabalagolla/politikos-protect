@@ -53,9 +53,14 @@ export const AuthProvider = ({ children }) => {
     }
   }
 
-  const register = async (name, email, password) => {
+  const register = async (userData) => {
     try {
-      const response = await api.post('/auth/register', { name, email, password })
+      // userData can be either old format (name, email, password) or new format (object with all fields)
+      const registrationData = typeof userData === 'string' 
+        ? { name: userData, email: arguments[1], password: arguments[2] }
+        : userData;
+
+      const response = await api.post('/auth/register', registrationData)
       const { citizen, token } = response
 
       localStorage.setItem('token', token)
